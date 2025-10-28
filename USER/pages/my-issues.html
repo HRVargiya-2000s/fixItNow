@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reported Issues - FixItNow</title>
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/auth-guard.css">
+    <link rel="stylesheet" href="../css/my-issues.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Prevent flash of content before auth check */
+        body { opacity: 0; transition: opacity 0.3s ease; visibility: hidden; }
+        body.auth-checked { opacity: 1; visibility: visible; }
+    </style>
+    <script>
+        // Immediate auth check before page renders
+        (function() {
+            const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                try {
+                    const userData = JSON.parse(user);
+                    if (!userData.loggedIn) {
+                        window.location.href = 'login.html';
+                    }
+                } catch(e) {
+                    window.location.href = 'login.html';
+                }
+            }
+        })();
+    </script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="../images/logo.svg" alt="FixItNow Logo" class="nav-logo">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <span>FixItNow</span>
+                </a>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="report-issue.html">Report Issue</a></li>
+                <li><a href="find-workers.html">Find Workers</a></li>
+                <li><a href="my-issues.html" class="active">My Issues</a></li>
+                <li><a href="quick-guides.html">Quick Guides</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="login.html" class="btn-nav-login">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">My Reported Issues</h1>
+            <p class="hero-subtitle">Track and manage all your repair requests in one place</p>
+            
+            <!-- Statistics Cards -->
+            <div class="stats-container">
+                <div class="stat-card-small total">
+                    <i class="fas fa-list"></i>
+                    <div>
+                        <span class="stat-number" id="totalCount">0</span>
+                        <span class="stat-label">Total</span>
+                    </div>
+                </div>
+                <div class="stat-card-small pending">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <span class="stat-number" id="pendingCount">0</span>
+                        <span class="stat-label">Pending</span>
+                    </div>
+                </div>
+                <div class="stat-card-small progress">
+                    <i class="fas fa-spinner"></i>
+                    <div>
+                        <span class="stat-number" id="progressCount">0</span>
+                        <span class="stat-label">In Progress</span>
+                    </div>
+                </div>
+                <div class="stat-card-small completed">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <span class="stat-number" id="completedCount">0</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label>Status:</label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="all">All Issues</option>
+                        <option value="pending">Pending</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Category:</label>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <option value="electrical">Electrical</option>
+                        <option value="plumbing">Plumbing</option>
+                        <option value="vehicle">Vehicle</option>
+                        <option value="furniture">Furniture</option>
+                        <option value="appliance">Appliance</option>
+                        <option value="hvac">HVAC</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Urgency:</label>
+                    <select id="urgencyFilter" class="filter-select">
+                        <option value="all">All Priorities</option>
+                        <option value="emergency">Emergency</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Issues Section -->
+    <section class="categories">
+        <div class="container">
+            <h2 class="section-title">Your Issues</h2>
+            
+            <!-- Issues Grid -->
+            <div class="category-grid" id="issuesGrid">
+                <!-- Issues will be populated by JavaScript -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <h3>No Issues Found</h3>
+                <p>You haven't reported any issues yet</p>
+                <a href="report-issue.html" class="btn-primary">
+                    <i class="fas fa-plus"></i> Report Your First Issue
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-tools"></i> FixItNow</h3>
+                    <p>Empowering self-reliance through visual repair guides</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="troubleshooter.html">Troubleshooter</a></li>
+                        <li><a href="toolbox.html">Toolbox</a></li>
+                        <li><a href="safety.html">Safety Guidelines</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 FixItNow. Design Engineering Project - IIA</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/api-config.js"></script>
+    <script src="../js/auth-guard.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        // Load issues from localStorage
+        let allIssues = [];
+        let currentStatusFilter = 'all';
+        let currentCategoryFilter = 'all';
+        let currentUrgencyFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadIssues();
+            setupFilters();
+        });
+
+        function loadIssues() {
+            // Get issues from localStorage
+            const storedIssues = localStorage.getItem('reportedIssues');
+            allIssues = storedIssues ? JSON.parse(storedIssues) : getSampleIssues();
+            
+            updateStats();
+            displayIssues();
+        }
+
+        function setupFilters() {
+            const statusFilter = document.getElementById('statusFilter');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const urgencyFilter = document.getElementById('urgencyFilter');
+
+            statusFilter.addEventListener('change', (e) => {
+                currentStatusFilter = e.target.value;
+                displayIssues();
+            });
+
+            categoryFilter.addEventListener('change', (e) => {
+                currentCategoryFilter = e.target.value;
+                displayIssues();
+            });
+
+            urgencyFilter.addEventListener('change', (e) => {
+                currentUrgencyFilter = e.target.value;
+                displayIssues();
+            });
+        }
+
+        function getSampleIssues() {
+            // Sample data for demonstration
+            return [
+                {
+                    id: Date.now() - 10000,
+                    category: 'plumbing',
+                    issueTitle: 'Leaking Kitchen Faucet',
+                    description: 'Water is dripping from the kitchen faucet continuously. Started yesterday.',
+                    urgency: 'medium',
+                    status: 'in-progress',
+                    budget: 150,
+                    address: '123 Main Street, New York, NY 10001',
+                    contactPhone: '+1 (555) 123-4567',
+                    createdAt: new Date(Date.now() - 86400000).toISOString()
+                },
+                {
+                    id: Date.now() - 20000,
+                    category: 'electrical',
+                    issueTitle: 'Bedroom Light Not Working',
+                    description: 'Light fixture in master bedroom suddenly stopped working.',
+                    urgency: 'low',
+                    status: 'pending',
+                    budget: 100,
+                    address: '123 Main Street, New York, NY 10001',
+                    contactPhone: '+1 (555) 123-4567',
+                    createdAt: new Date(Date.now() - 172800000).toISOString()
+                },
+                {
+                    id: Date.now() - 30000,
+                    category: 'vehicle',
+                    issueTitle: 'Car Oil Change Needed',
+                    description: 'Regular maintenance - oil change and filter replacement required.',
+                    urgency: 'low',
+                    status: 'completed',
+                    budget: 80,
+                    address: '123 Main Street, New York, NY 10001',
+                    contactPhone: '+1 (555) 123-4567',
+                    createdAt: new Date(Date.now() - 259200000).toISOString()
+                }
+            ];
+        }
+
+        function updateStats() {
+            const total = allIssues.length;
+            const pending = allIssues.filter(i => i.status === 'pending').length;
+            const progress = allIssues.filter(i => i.status === 'in-progress' || i.status === 'accepted').length;
+            const completed = allIssues.filter(i => i.status === 'completed').length;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('progressCount').textContent = progress;
+            document.getElementById('completedCount').textContent = completed;
+        }
+
+        function displayIssues() {
+            const grid = document.getElementById('issuesGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            let filtered = allIssues.filter(issue => {
+                const matchesStatus = currentStatusFilter === 'all' || issue.status === currentStatusFilter;
+                const matchesCategory = currentCategoryFilter === 'all' || issue.category === currentCategoryFilter;
+                const matchesUrgency = currentUrgencyFilter === 'all' || issue.urgency === currentUrgencyFilter;
+                return matchesStatus && matchesCategory && matchesUrgency;
+            });
+
+            if (filtered.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'flex';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            grid.innerHTML = filtered.map(issue => createIssueCard(issue)).join('');
+        }
+
+        function createIssueCard(issue) {
+            const categoryIcons = {
+                electrical: 'fa-bolt',
+                plumbing: 'fa-faucet',
+                vehicle: 'fa-car',
+                furniture: 'fa-couch',
+                appliance: 'fa-blender',
+                hvac: 'fa-fan'
+            };
+
+            const urgencyLabels = {
+                low: 'Low Priority',
+                medium: 'Medium Priority',
+                high: 'High Priority',
+                emergency: 'Emergency'
+            };
+
+            const statusLabels = {
+                pending: 'Pending',
+                accepted: 'Accepted',
+                'in-progress': 'In Progress',
+                completed: 'Completed'
+            };
+
+            const date = new Date(issue.createdAt);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+
+            return `
+                <div class="category-card">
+                    <div class="card-icon ${issue.category}">
+                        <i class="fas ${categoryIcons[issue.category] || 'fa-tools'}"></i>
+                    </div>
+                    <h3>${issue.issueTitle}</h3>
+                    <p>${issue.description}</p>
+                    <div class="issue-meta">
+                        <span class="meta-badge">
+                            <i class="fas fa-calendar"></i> ${formattedDate}
+                        </span>
+                        <span class="meta-badge urgency-${issue.urgency}">
+                            <i class="fas fa-exclamation-circle"></i> ${urgencyLabels[issue.urgency]}
+                        </span>
+                        <span class="meta-badge status-${issue.status}">
+                            <i class="fas fa-info-circle"></i> ${statusLabels[issue.status]}
+                        </span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="guide-count">Budget: $${issue.budget || 'Not set'}</span>
+                        <button class="card-btn" onclick="viewIssue(${issue.id})">
+                            View Details <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function viewIssue(id) {
+            const issue = allIssues.find(i => i.id === id);
+            if (!issue) return;
+            
+            alert(`Issue Details - #${id}\n\n` +
+                  `Title: ${issue.issueTitle}\n` +
+                  `Category: ${issue.category}\n` +
+                  `Status: ${issue.status}\n` +
+                  `Priority: ${issue.urgency}\n` +
+                  `Budget: $${issue.budget}\n` +
+                  `Address: ${issue.address}\n` +
+                  `Phone: ${issue.contactPhone}\n\n` +
+                  `Description:\n${issue.description}`);
+        }
+
+        function cancelIssue(id) {
+            if (confirm('Are you sure you want to cancel this issue?')) {
+                allIssues = allIssues.filter(issue => issue.id !== id);
+                localStorage.setItem('reportedIssues', JSON.stringify(allIssues));
+                updateStats();
+                displayIssues();
+                alert('Issue cancelled successfully!');
+            }
+        }
+    </script>
+</body>
+</html>

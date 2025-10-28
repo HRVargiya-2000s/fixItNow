@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completed Jobs - FixItNow Worker</title>
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/worker.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
+        body.auth-checked { opacity: 1; visibility: visible; }
+    </style>
+    <script src="../js/api-config.js"></script>
+    <script src="../js/auth-guard.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="../images/logo.svg" alt="FixItNow Logo" class="nav-logo">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <span>FixItNow Worker</span>
+                </a>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="job-requests.html">Job Requests</a></li>
+                <li><a href="ongoing-jobs.html">Ongoing Jobs</a></li>
+                <li><a href="completed-jobs.html" class="active">Completed Jobs</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                <!-- Online Status Toggle -->
+                <div class="status-toggle">
+                    <input type="checkbox" id="onlineStatus" class="status-checkbox">
+                    <label for="onlineStatus" class="status-label">
+                        <span class="status-text">Offline</span>
+                    </label>
+                </div>
+                
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <a href="login.html" class="btn-nav-login">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Completed Jobs ✅</h1>
+            <p class="hero-subtitle">View your completed work history and earnings</p>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section-dark">
+        <div class="container">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label><i class="fas fa-filter"></i> Filter by:</label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="all">All Jobs</option>
+                        <option value="this-month">This Month</option>
+                        <option value="last-month">Last Month</option>
+                        <option value="this-year">This Year</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-th-large"></i> Category:</label>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <option value="plumbing">Plumbing</option>
+                        <option value="electrical">Electrical</option>
+                        <option value="vehicle">Vehicle</option>
+                        <option value="appliance">Appliance</option>
+                        <option value="hvac">HVAC</option>
+                        <option value="furniture">Furniture</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-search"></i> Search:</label>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="searchInput" placeholder="Search by location or description..." class="filter-select">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Completed Jobs Section -->
+    <section class="jobs-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Your Completed Jobs</h2>
+                <div class="earnings-summary">
+                    <span>Total Earnings: <strong id="totalEarnings">$0</strong></span>
+                </div>
+            </div>
+            
+            <div class="jobs-grid" id="completedJobsGrid">
+                <!-- Jobs will be loaded by JavaScript -->
+                <div class="empty-state">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>No completed jobs yet</h3>
+                    <p>Completed jobs will appear here</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-tools"></i> FixItNow Worker</h3>
+                    <p>Empowering freelance workers to grow their business</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="help.html">Help Center</a></li>
+                        <li><a href="guidelines.html">Guidelines</a></li>
+                        <li><a href="support.html">Support</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="safety.html">Safety Tips</a></li>
+                        <li><a href="pricing.html">Pricing Guide</a></li>
+                        <li><a href="reviews.html">Reviews</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 FixItNow Worker Portal. Design Engineering Project - IIA</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/completed-jobs.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('auth-checked');
+        });
+    </script>
+</body>
+</html>

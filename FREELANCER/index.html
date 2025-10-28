@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixItNow Worker Dashboard</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:;">
+    <script>
+        // Early suppression for noisy browser extension errors (e.g. Google Translate - content-all.js)
+        (function(){
+            function looksLikeExtensionError(obj){
+                try{
+                    if(!obj) return false;
+                    var msg = '';
+                    if(obj.message) msg += obj.message + ' ';
+                    if(obj.reason && obj.reason.message) msg += obj.reason.message + ' ';
+                    var filename = obj.filename || (obj.reason && obj.reason.filename) || '';
+
+                    if(msg.indexOf('translate-page') !== -1) return true;
+                    if(msg.indexOf('Cannot find menu item') !== -1) return true;
+                    if(filename.indexOf('content-all.js') !== -1) return true;
+                    if(filename.indexOf('chrome-extension://') === 0) return true;
+                    if(filename.indexOf('moz-extension://') === 0) return true;
+                    return false;
+                }catch(e){ return false; }
+            }
+
+            window.addEventListener('error', function(e){
+                if(looksLikeExtensionError(e)){
+                    try{ e.preventDefault(); }catch(err){}
+                    return false;
+                }
+            }, true);
+
+            window.addEventListener('unhandledrejection', function(e){
+                if(looksLikeExtensionError(e.reason || e)){
+                    try{ e.preventDefault(); }catch(err){}
+                    return false;
+                }
+            }, true);
+
+            // Quiet certain console.error noise coming from extensions
+            var _origConsoleError = console.error.bind(console);
+            console.error = function(){
+                try{
+                    var args = Array.prototype.slice.call(arguments).join(' ');
+                    if(args && (args.indexOf('translate-page') !== -1 || args.indexOf('content-all.js') !== -1 || args.indexOf('Cannot find menu item') !== -1)){
+                        return;
+                    }
+                }catch(e){}
+                _origConsoleError.apply(console, arguments);
+            };
+        })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/worker.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Prevent flash before auth check */
+        body {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        body.auth-checked {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <!-- Global Error Handler for Browser Extensions -->
+    <script>
+        // Suppress browser extension errors
+        window.addEventListener('error', function(e) {
+            // Suppress common extension errors
+            if (e.filename && (
+                e.filename.includes('content-all.js') ||
+                e.filename.includes('chrome-extension://') ||
+                e.filename.includes('moz-extension://') ||
+                e.message.includes('translate-page') ||
+                e.message.includes('Cannot find menu item')
+            )) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Suppress unhandled promise rejections from extensions
+        window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && (
+                e.reason.message && (
+                    e.reason.message.includes('translate-page') ||
+                    e.reason.message.includes('Cannot find menu item') ||
+                    e.reason.message.includes('content-all.js')
+                )
+            )) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Prevent extensions from modifying context menus
+        // Removed chrome.contextMenus.removeAll() as it may cause extension errors
+    </script>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="images/logo.svg" alt="FixItNow Logo" class="nav-logo">
+                <span>FixItNow Worker</span>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="pages/job-requests.html">Job Requests</a></li>
+                <li><a href="pages/ongoing-jobs.html">Ongoing Jobs</a></li>
+                <li><a href="pages/completed-jobs.html">Completed Jobs</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                <!-- Online Status Toggle -->
+                <div class="status-toggle">
+                    <input type="checkbox" id="onlineStatus" class="status-checkbox">
+                    <label for="onlineStatus" class="status-label">
+                        <span class="status-text">Offline</span>
+                    </label>
+                </div>
+                
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <a href="pages/login.html" class="btn-nav-login" id="authButton">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero worker-hero">
+        <div class="container">
+            <h1 class="hero-title">Welcome, Worker! 👷‍♂️</h1>
+            <p class="hero-subtitle">Manage your job requests, track ongoing work, and grow your business</p>
+            
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <i class="fas fa-inbox"></i>
+                    <div class="stat-info">
+                        <h3 id="newRequestsCount">0</h3>
+                        <p>New Requests</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-tools"></i>
+                    <div class="stat-info">
+                        <h3 id="ongoingJobsCount">0</h3>
+                        <p>Ongoing Jobs</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="stat-info">
+                        <h3 id="completedJobsCount">0</h3>
+                        <p>Completed This Month</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <div class="stat-info">
+                        <h3 id="ratingScore">4.8</h3>
+                        <p>Your Rating</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions Section -->
+    <section class="quick-access">
+        <div class="container">
+            <h2 class="section-title">Quick Actions</h2>
+            
+            <div class="quick-access-grid">
+                <a href="pages/job-requests.html" class="quick-card">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>View Job Requests</h3>
+                    <p>See new job requests from customers</p>
+                    <span class="badge" id="newBadge">0 New</span>
+                </a>
+                
+                <a href="pages/ongoing-jobs.html" class="quick-card">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Ongoing Jobs</h3>
+                    <p>Track and update your active jobs</p>
+                    <span class="badge active-badge" id="activeBadge">0 Active</span>
+                </a>
+                
+                <a href="pages/earnings.html" class="quick-card">
+                    <i class="fas fa-wallet"></i>
+                    <h3>Earnings</h3>
+                    <p>View your payment history</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-tools"></i> FixItNow Worker</h3>
+                    <p>Empowering freelance workers to grow their business</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="pages/help.html">Help Center</a></li>
+                        <li><a href="pages/guidelines.html">Guidelines</a></li>
+                        <li><a href="pages/support.html">Support</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="pages/safety.html">Safety Tips</a></li>
+                        <li><a href="pages/pricing.html">Pricing Guide</a></li>
+                        <li><a href="pages/reviews.html">Reviews</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 FixItNow Worker Portal. Design Engineering Project - IIA</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Update auth button to show logout
+        document.addEventListener('DOMContentLoaded', () => {
+            const authButton = document.getElementById('authButton');
+            
+            if (typeof workerAuthGuard !== 'undefined' && workerAuthGuard.isAuthenticated()) {
+                const workerData = workerAuthGuard.getWorkerData();
+                
+                // Show user avatar or icon
+                if (workerData && workerData.picture) {
+                    authButton.innerHTML = `<img src="${workerData.picture}" alt="${workerData.name}" class="user-avatar" title="${workerData.name}">`;
+                } else {
+                    authButton.innerHTML = '<i class="fas fa-user-circle" style="font-size: 1.5rem;"></i>';
+                }
+                
+                authButton.title = 'Logout';
+                authButton.href = '#';
+                authButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to logout?')) {
+                        workerAuthGuard.logout();
+                    }
+                });
+                
+                // Show body after auth check
+                document.body.classList.add('auth-checked');
+            }
+        });
+    </script>
+</body>
+</html>

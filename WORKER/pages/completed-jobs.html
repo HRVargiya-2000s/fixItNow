@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completed Jobs - FixItNow Worker</title>
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/worker.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
+        body.auth-checked { opacity: 1; visibility: visible; }
+    </style>
+    <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<!-- Your Config & Auth -->
+<script src="../js/config.js"></script>
+<script src="../js/auth.js"></script>
+
+    <script src="../js/auth-guard.js"></script>
+    <script src="../js/auth-check.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="../images/logo.svg" alt="FixItNow Logo" class="nav-logo">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <span>FixItNow Worker</span>
+                </a>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="job-requests.html">New Jobs</a></li>
+                <li><a href="ongoing-jobs.html">Ongoing Jobs</a></li>
+                <li><a href="completed-jobs.html" class="active">Completed Jobs</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                <!-- Online Status Toggle -->
+                <div class="status-toggle">
+                    <input type="checkbox" id="onlineStatus" class="status-checkbox">
+                    <label for="onlineStatus" class="status-label">
+                        <span class="status-text">Offline</span>
+                    </label>
+                </div>
+                
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <div style="position:relative;">
+                    <button class="btn-nav-login" id="profileToggle" aria-haspopup="true" aria-expanded="false" title="Account">
+                        <i class="fas fa-user"></i>
+                    </button>
+
+                    <div id="profileDropdown" class="user-menu-dropdown" style="display:none; position:absolute; right:0; top:48px; z-index:30;">
+                        <div class="user-menu-header">
+                            <div style="flex: 1;">
+                                <p style="font-size: 12px; color: #94a3b8; margin: 0 0 8px 0; font-weight: 500;">Profile</p>
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <img id="profileDropdownImg" src="../images/logo.svg" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1);">
+                                    <div style="flex: 1;">
+                                        <p class="user-menu-header-name" id="profileDropdownName" style="font-weight: 600; font-size: 14px; color: #fff; margin: 0;">Worker</p>
+                                        <p class="user-menu-header-email" id="profileDropdownEmail" style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">worker@email.com</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-menu-items">
+                            <a href="job-requests.html" id="menuNewJobs"><i class="fas fa-list"></i> New Jobs</a>
+                            <a href="#" class="logout-btn" id="menuLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Completed Jobs ✅</h1>
+            <p class="hero-subtitle">View your completed work history and earnings</p>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section-dark">
+        <div class="container">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label><i class="fas fa-filter"></i> Filter by:</label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="all">All Jobs</option>
+                        <option value="this-month">This Month</option>
+                        <option value="last-month">Last Month</option>
+                        <option value="this-year">This Year</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-th-large"></i> Category:</label>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <option value="plumbing">Plumbing</option>
+                        <option value="electrical">Electrical</option>
+                        <option value="vehicle">Vehicle</option>
+                        <option value="appliance">Appliance</option>
+                        <option value="hvac">HVAC</option>
+                        <option value="furniture">Furniture</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-search"></i> Search:</label>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="searchInput" placeholder="Search by location or description..." class="filter-select">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Completed Jobs Section -->
+    <section class="jobs-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Your Completed Jobs</h2>
+                <div class="earnings-summary">
+                    <span>Total Earnings: <strong id="totalEarnings">$0</strong></span>
+                </div>
+            </div>
+            
+            <div class="jobs-grid" id="completedJobsGrid">
+                <!-- Jobs will be loaded by JavaScript -->
+                <div class="empty-state">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>No completed jobs yet</h3>
+                    <p>Completed jobs will appear here</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-tools"></i> FixItNow Worker</h3>
+                    <p>Empowering freelance workers to grow their business</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="help.html">Help Center</a></li>
+                        <li><a href="guidelines.html">Guidelines</a></li>
+                        <li><a href="support.html">Support</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="safety.html">Safety Tips</a></li>
+                        <li><a href="pricing.html">Pricing Guide</a></li>
+                        <li><a href="reviews.html">Reviews</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 FixItNow Worker Portal. Design Engineering Project - IIA</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/completed-jobs.js"></script>
+    <script>
+        // Profile dropdown and auth wiring
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const menuLogout = document.getElementById('menuLogout');
+
+            function closeDropdown() {
+                profileDropdown.style.display = 'none';
+                profileToggle.setAttribute('aria-expanded', 'false');
+            }
+
+            function openDropdown() {
+                profileDropdown.style.display = 'block';
+                profileToggle.setAttribute('aria-expanded', 'true');
+            }
+
+            function updateProfileInfo() {
+                try {
+                    let userData = null;
+                    let profileImg = null;
+                    let profileName = 'Worker';
+                    let profileEmail = 'worker@email.com';
+
+                    // Try to get user data from different auth sources
+                    if (window.workerAuthGuard && typeof window.workerAuthGuard.getWorkerData === 'function') {
+                        userData = window.workerAuthGuard.getWorkerData();
+                    } else if (window.unifiedAuth && typeof window.unifiedAuth.getUser === 'function') {
+                        userData = window.unifiedAuth.getUser();
+                    } else if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                        userData = firebase.auth().currentUser;
+                    }
+
+                    if (userData) {
+                        profileName = userData.fullName || userData.displayName || userData.name || 'Worker';
+                        profileEmail = userData.email || userData.userEmail || 'worker@email.com';
+                        profileImg = userData.picture || userData.photoURL || userData.profilePicture || '../images/logo.svg';
+                    }
+
+                    // Update dropdown header
+                    const profileDropdownImg = document.getElementById('profileDropdownImg');
+                    const profileDropdownName = document.getElementById('profileDropdownName');
+                    const profileDropdownEmail = document.getElementById('profileDropdownEmail');
+
+                    if (profileDropdownImg) profileDropdownImg.src = profileImg;
+                    if (profileDropdownName) profileDropdownName.textContent = profileName;
+                    if (profileDropdownEmail) profileDropdownEmail.textContent = profileEmail;
+
+                    // Update nav button icon/avatar
+                    if (profileImg && profileImg !== '../images/logo.svg') {
+                        profileToggle.innerHTML = `<img src="${profileImg}" alt="${profileName}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">`;
+                    } else {
+                        profileToggle.innerHTML = '<i class="fas fa-user-circle" style="font-size:1.2rem"></i>';
+                    }
+
+                    profileToggle.title = profileName;
+                } catch (err) {
+                    console.warn('Error updating profile info:', err);
+                }
+            }
+
+            // Toggle behavior
+            profileToggle.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                // Wait briefly for auth systems to be ready before deciding
+                let isAuth = false;
+                try {
+                    if (window.waitForAuthReady) {
+                        isAuth = await window.waitForAuthReady(1000);
+                    } else {
+                        // fallback immediate checks
+                        if (window.workerAuthGuard && typeof window.workerAuthGuard.isAuthenticated === 'function') isAuth = window.workerAuthGuard.isAuthenticated();
+                        if (!isAuth && window.workerAuth && typeof window.workerAuth.isAuthenticated === 'function') isAuth = window.workerAuth.isAuthenticated();
+                        if (!isAuth && typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) isAuth = true;
+                    }
+                } catch (err) { isAuth = false; }
+
+                if (!isAuth) {
+                    const target = window.location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html';
+                    window.location.replace(target);
+                    return;
+                }
+
+                // Update profile info before showing dropdown
+                updateProfileInfo();
+
+                // Toggle dropdown for authenticated users
+                if (profileDropdown.style.display === 'block') {
+                    closeDropdown();
+                } else {
+                    openDropdown();
+                }
+            });
+
+            // Logout menu item
+            menuLogout.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (window.workerAuthGuard && typeof window.workerAuthGuard.logout === 'function') {
+                    await window.workerAuthGuard.logout();
+                } else {
+                    // Fallback: try to use firebase auth if available
+                    if (window.workerAuth && typeof window.workerAuth.logout === 'function') {
+                        await window.workerAuth.logout();
+                    } else if (typeof auth !== 'undefined' && auth.signOut) {
+                        try { await auth.signOut(); } catch (err) { /* ignore */ }
+                        const target = window.location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html';
+                        window.location.replace(target);
+                    } else {
+                        const target = window.location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html';
+                        window.location.replace(target);
+                    }
+                }
+            });
+
+            // Close dropdown on outside click
+            document.addEventListener('click', (e) => {
+                if (!profileDropdown.contains(e.target) && e.target !== profileToggle) {
+                    closeDropdown();
+                }
+            });
+
+            // When auth guard initializes, show body and update avatar if available
+            if (window.workerAuthGuard) {
+                // Wait briefly for guard.init if it's running
+                setTimeout(() => {
+                    try {
+                        if (window.workerAuthGuard.isAuthenticated()) {
+                            updateProfileInfo();
+                        }
+                    } catch (err) { /* ignore */ }
+                    document.body.classList.add('auth-checked');
+                }, 250);
+            } else {
+                // No auth guard; show page
+                document.body.classList.add('auth-checked');
+            }
+        });
+    </script>
+</body>
+</html>

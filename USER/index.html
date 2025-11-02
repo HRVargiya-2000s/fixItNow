@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixItNow - DIY Repair Guide</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:;">
+    <script>
+        // Early suppression for noisy browser extension errors (e.g. Google Translate - content-all.js)
+        (function(){
+            function looksLikeExtensionError(obj){
+                try{
+                    if(!obj) return false;
+                    var msg = '';
+                    if(obj.message) msg += obj.message + ' ';
+                    if(obj.reason && obj.reason.message) msg += obj.reason.message + ' ';
+                    var filename = obj.filename || (obj.reason && obj.reason.filename) || '';
+
+                    if(msg.indexOf('translate-page') !== -1) return true;
+                    if(msg.indexOf('Cannot find menu item') !== -1) return true;
+                    if(filename.indexOf('content-all.js') !== -1) return true;
+                    if(filename.indexOf('chrome-extension://') === 0) return true;
+                    if(filename.indexOf('moz-extension://') === 0) return true;
+                    return false;
+                }catch(e){ return false; }
+            }
+
+            window.addEventListener('error', function(e){
+                if(looksLikeExtensionError(e)){
+                    try{ e.preventDefault(); }catch(err){}
+                    return false;
+                }
+            }, true);
+
+            window.addEventListener('unhandledrejection', function(e){
+                if(looksLikeExtensionError(e.reason || e)){
+                    try{ e.preventDefault(); }catch(err){}
+                    return false;
+                }
+            }, true);
+
+            // Quiet certain console.error noise coming from extensions
+            var _origConsoleError = console.error.bind(console);
+            console.error = function(){
+                try{
+                    var args = Array.prototype.slice.call(arguments).join(' ');
+                    if(args && (args.indexOf('translate-page') !== -1 || args.indexOf('content-all.js') !== -1 || args.indexOf('Cannot find menu item') !== -1)){
+                        return;
+                    }
+                }catch(e){}
+                _origConsoleError.apply(console, arguments);
+            };
+        })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth-guard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Global Error Handler for Browser Extensions -->
+    <script>
+        // Suppress browser extension errors
+        window.addEventListener('error', function(e) {
+            // Suppress common extension errors
+            if (e.filename && (
+                e.filename.includes('content-all.js') ||
+                e.filename.includes('chrome-extension://') ||
+                e.filename.includes('moz-extension://') ||
+                e.message.includes('translate-page') ||
+                e.message.includes('Cannot find menu item')
+            )) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Suppress unhandled promise rejections from extensions
+        window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && (
+                e.reason.message && (
+                    e.reason.message.includes('translate-page') ||
+                    e.reason.message.includes('Cannot find menu item') ||
+                    e.reason.message.includes('content-all.js')
+                )
+            )) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Prevent extensions from modifying context menus
+        // Removed chrome.contextMenus.removeAll() as it may cause extension errors
+    </script>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="images/logo.svg" alt="FixItNow Logo" class="nav-logo">
+                <span>FixItNow</span>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="pages/report-issue.html">Report Issue</a></li>
+                <!-- Removed Find Workers tab from navbar -->
+                <li><a href="pages/my-issues.html">My Issues</a></li>
+                <li><a href="pages/quick-guides.html">Quick Guides</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="pages/login.html" class="btn-nav-login">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Fix It Yourself, Save Time & Money</h1>
+            <p class="hero-subtitle">Visual step-by-step guides for common household and vehicle repairs</p>
+            
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput"
+                    placeholder="Search for a repair guide... (e.g., 'leaking faucet', 'flat tire')"
+                >
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+                <div class="search-suggestions" id="searchSuggestions"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label>Category:</label>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <option value="electrical">Electrical</option>
+                        <option value="plumbing">Plumbing</option>
+                        <option value="vehicle">Vehicle</option>
+                        <option value="furniture">Furniture</option>
+                        <option value="appliance">Appliance</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Difficulty:</label>
+                    <select id="difficultyFilter" class="filter-select">
+                        <option value="all">All Levels</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Cards Section -->
+    <section class="categories">
+        <div class="container">
+            <h2 class="section-title">Browse by Category</h2>
+            
+            <div class="category-grid" id="categoryGrid">
+                <!-- Electrical -->
+                <div class="category-card" data-category="electrical" data-difficulty="all">
+                    <div class="card-icon electrical">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Electrical</h3>
+                    <p>Light fixtures, outlets, switches, and wiring</p>
+                    <div class="card-footer">
+                        <span class="guide-count">12 Guides</span>
+                        <a href="pages/quick-guides.html?category=electrical" class="card-btn">
+                            Explore <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Plumbing -->
+                <div class="category-card" data-category="plumbing" data-difficulty="all">
+                    <div class="card-icon plumbing">
+                        <i class="fas fa-faucet"></i>
+                    </div>
+                    <h3>Plumbing</h3>
+                    <p>Faucets, pipes, drains, and water heaters</p>
+                    <div class="card-footer">
+                        <span class="guide-count">15 Guides</span>
+                        <a href="pages/quick-guides.html?category=plumbing" class="card-btn">
+                            Explore <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Vehicle -->
+                <div class="category-card" data-category="vehicle" data-difficulty="all">
+                    <div class="card-icon vehicle">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h3>Vehicle</h3>
+                    <p>Oil changes, tire repairs, battery replacement</p>
+                    <div class="card-footer">
+                        <span class="guide-count">18 Guides</span>
+                        <a href="pages/quick-guides.html?category=vehicle" class="card-btn">
+                            Explore <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Furniture -->
+                <div class="category-card" data-category="furniture" data-difficulty="all">
+                    <div class="card-icon furniture">
+                        <i class="fas fa-couch"></i>
+                    </div>
+                    <h3>Furniture</h3>
+                    <p>Assembly, repairs, refinishing, and restoration</p>
+                    <div class="card-footer">
+                        <span class="guide-count">10 Guides</span>
+                        <a href="pages/quick-guides.html?category=furniture" class="card-btn">
+                            Explore <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Appliance -->
+                <div class="category-card" data-category="appliance" data-difficulty="all">
+                    <div class="card-icon appliance">
+                        <i class="fas fa-blender"></i>
+                    </div>
+                    <h3>Appliance</h3>
+                    <p>Refrigerators, washers, dryers, microwaves</p>
+                    <div class="card-footer">
+                        <span class="guide-count">14 Guides</span>
+                        <a href="pages/quick-guides.html?category=appliance" class="card-btn">
+                            Explore <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- HVAC -->
+                <div class="category-card" data-category="hvac" data-difficulty="all">
+                    <div class="card-icon hvac">
+                        <i class="fas fa-fan"></i>
+                    </div>
+                    <h3>HVAC</h3>
+                    <p>Heating, ventilation, and air conditioning</p>
+                    <div class="card-footer">
+                        <span class="guide-count">8 Guides</span>
+                        <a href="pages/quick-guides.html?category=hvac" class="card-btn">
+                            Explore <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Access Section -->
+    <section class="quick-access">
+        <div class="container">
+            <h2 class="section-title">Quick Access</h2>
+            
+            <div class="quick-access-grid">
+                <a href="pages/my-issues.html" class="quick-card">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>My Reported Issues</h3>
+                    <p>Track and manage your repair requests</p>
+                </a>
+                
+                <a href="pages/toolbox.html" class="quick-card">
+                    <i class="fas fa-toolbox"></i>
+                    <h3>Essential Toolbox</h3>
+                    <p>Learn about must-have tools for repairs</p>
+                </a>
+                
+                <a href="pages/safety.html" class="quick-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Safety Guidelines</h3>
+                    <p>Stay safe while making repairs</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-tools"></i> FixItNow</h3>
+                    <p>Empowering self-reliance through visual repair guides</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="pages/about.html">About Us</a></li>
+                        <li><a href="pages/faq.html">FAQ</a></li>
+                        <li><a href="pages/contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="pages/troubleshooter.html">Troubleshooter</a></li>
+                        <li><a href="pages/toolbox.html">Toolbox</a></li>
+                        <li><a href="pages/safety.html">Safety Guidelines</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 FixItNow. Design Engineering Project - IIA</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs (needed for unified auth) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- App config and unified auth must load before main.js so the profile menu can initialize correctly -->
+    <script src="js/config.js"></script>
+    <script src="js/auth-unified.js"></script>
+    <script src="js/auth-check.js"></script>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

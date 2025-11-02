@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Guides - FixItNow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/quick-guides.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-tools"></i>
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <span>FixItNow</span>
+                </a>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle">
+                <function_calls>
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="report-issue.html">Report Issue</a></li>
+                <li><a href="find-workers.html">Find Workers</a></li>
+                <li><a href="my-issues.html">My Issues</a></li>
+                <li><a href="quick-guides.html" class="active">Quick Guides</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="login.html" class="btn-nav-login">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Guides Section -->
+    <section class="guides-section">
+        <div class="container">
+            <div class="guides-header">
+                <i class="fas fa-book-open header-icon"></i>
+                <h1>Quick DIY Guides</h1>
+                <p>Learn to fix common issues with step-by-step video tutorials</p>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="search-filter-section">
+                <div class="search-box-container">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search for guides...">
+                    </div>
+                </div>
+
+                <div class="category-filters">
+                    <button class="category-btn active" data-category="all">
+                        <i class="fas fa-th"></i> All Guides
+                    </button>
+                    <button class="category-btn" data-category="electrical">
+                        <i class="fas fa-bolt"></i> Electrical
+                    </button>
+                    <button class="category-btn" data-category="plumbing">
+                        <i class="fas fa-faucet"></i> Plumbing
+                    </button>
+                    <button class="category-btn" data-category="vehicle">
+                        <i class="fas fa-car"></i> Vehicle
+                    </button>
+                    <button class="category-btn" data-category="furniture">
+                        <i class="fas fa-couch"></i> Furniture
+                    </button>
+                    <button class="category-btn" data-category="appliance">
+                        <i class="fas fa-blender"></i> Appliance
+                    </button>
+                </div>
+            </div>
+
+            <!-- Guides Grid -->
+            <div class="guides-grid" id="guidesGrid">
+                <!-- Guide cards will be populated by JavaScript -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-guides" id="emptyState" style="display: none;">
+                <i class="fas fa-video-slash"></i>
+                <h3>No guides found</h3>
+                <p>Try adjusting your search or filter</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-container">
+            <button class="close-modal" id="closeModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <iframe id="videoFrame" src="" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-tools"></i> FixItNow</h3>
+                    <p>Empowering self-reliance through visual repair guides</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="troubleshooter.html">Troubleshooter</a></li>
+                        <li><a href="toolbox.html">Toolbox</a></li>
+                        <li><a href="safety.html">Safety Guidelines</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 FixItNow. Design Engineering Project - IIA</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script>
+        // Sample guides data with YouTube video IDs
+        const allGuides = [
+            {
+                id: 1,
+                category: 'plumbing',
+                title: 'Fix a Leaking Faucet in 5 Minutes',
+                description: 'Learn how to repair a dripping faucet quickly and save water. Simple tools required.',
+                videoId: 'a7iJRw7lLu8',
+                duration: '5:23',
+                difficulty: 'easy',
+                views: '125K',
+                thumbnail: 'https://img.youtube.com/vi/a7iJRw7lLu8/maxresdefault.jpg'
+            },
+            {
+                id: 2,
+                category: 'electrical',
+                title: 'Replace a Light Switch Safely',
+                description: 'Step-by-step guide to replacing a faulty light switch with safety tips.',
+                videoId: 'SPhqBJY3rI0',
+                duration: '8:15',
+                difficulty: 'medium',
+                views: '89K',
+                thumbnail: 'https://img.youtube.com/vi/SPhqBJY3rI0/maxresdefault.jpg'
+            },
+            {
+                id: 3,
+                category: 'vehicle',
+                title: 'Change Your Car Oil - Complete Guide',
+                description: 'DIY oil change tutorial for beginners. Save money on maintenance.',
+                videoId: 'O1hF25Cowv8',
+                duration: '12:30',
+                difficulty: 'medium',
+                views: '234K',
+                thumbnail: 'https://img.youtube.com/vi/O1hF25Cowv8/maxresdefault.jpg'
+            },
+            {
+                id: 4,
+                category: 'appliance',
+                title: 'Unclog a Washing Machine Drain',
+                description: 'Fix drainage issues in your washing machine without calling a technician.',
+                videoId: '9BXNMu3x_RU',
+                duration: '6:45',
+                difficulty: 'easy',
+                views: '67K',
+                thumbnail: 'https://img.youtube.com/vi/9BXNMu3x_RU/maxresdefault.jpg'
+            },
+            {
+                id: 5,
+                category: 'electrical',
+                title: 'Install a Ceiling Fan',
+                description: 'Complete installation guide for ceiling fans with wiring instructions.',
+                videoId: 'qvlKGr-6fCc',
+                duration: '15:20',
+                difficulty: 'hard',
+                views: '156K',
+                thumbnail: 'https://img.youtube.com/vi/qvlKGr-6fCc/maxresdefault.jpg'
+            },
+            {
+                id: 6,
+                category: 'plumbing',
+                title: 'Unclog a Toilet Without a Plunger',
+                description: 'Emergency toilet unclogging methods using household items.',
+                videoId: 'sdAyfA-fq4Q',
+                duration: '4:50',
+                difficulty: 'easy',
+                views: '298K',
+                thumbnail: 'https://img.youtube.com/vi/sdAyfA-fq4Q/maxresdefault.jpg'
+            },
+            {
+                id: 7,
+                category: 'furniture',
+                title: 'Repair Broken Chair Leg',
+                description: 'Fix wooden furniture legs with simple woodworking techniques.',
+                videoId: 'XUMfS8gJTs0',
+                duration: '9:15',
+                difficulty: 'medium',
+                views: '45K',
+                thumbnail: 'https://img.youtube.com/vi/XUMfS8gJTs0/maxresdefault.jpg'
+            },
+            {
+                id: 8,
+                category: 'vehicle',
+                title: 'Replace Car Battery',
+                description: 'Quick guide to replacing your car battery safely.',
+                videoId: 'gUfJcWT-1aY',
+                duration: '7:30',
+                difficulty: 'easy',
+                views: '112K',
+                thumbnail: 'https://img.youtube.com/vi/gUfJcWT-1aY/maxresdefault.jpg'
+            },
+            {
+                id: 9,
+                category: 'appliance',
+                title: 'Fix a Refrigerator Not Cooling',
+                description: 'Troubleshoot and repair common refrigerator cooling problems.',
+                videoId: 'c3QF_GOAkME',
+                duration: '11:40',
+                difficulty: 'hard',
+                views: '178K',
+                thumbnail: 'https://img.youtube.com/vi/c3QF_GOAkME/maxresdefault.jpg'
+            },
+            {
+                id: 10,
+                category: 'plumbing',
+                title: 'Install a New Shower Head',
+                description: 'Upgrade your bathroom with a new shower head installation.',
+                videoId: 'FzbXqpJHPPg',
+                duration: '5:55',
+                difficulty: 'easy',
+                views: '92K',
+                thumbnail: 'https://img.youtube.com/vi/FzbXqpJHPPg/maxresdefault.jpg'
+            },
+            {
+                id: 11,
+                category: 'electrical',
+                title: 'Fix Flickering Lights',
+                description: 'Diagnose and fix flickering light problems in your home.',
+                videoId: 'tFgNbCKgMkU',
+                duration: '8:20',
+                difficulty: 'medium',
+                views: '134K',
+                thumbnail: 'https://img.youtube.com/vi/tFgNbCKgMkU/maxresdefault.jpg'
+            },
+            {
+                id: 12,
+                category: 'furniture',
+                title: 'Remove Scratches from Wood Furniture',
+                description: 'Restore wooden furniture by removing scratches and marks.',
+                videoId: 'VXRUWjKiQQc',
+                duration: '6:10',
+                difficulty: 'easy',
+                views: '76K',
+                thumbnail: 'https://img.youtube.com/vi/VXRUWjKiQQc/maxresdefault.jpg'
+            }
+        ];
+
+        let currentCategory = 'all';
+        let searchQuery = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayGuides();
+            setupFilters();
+            setupSearch();
+            setupModal();
+        });
+
+        function displayGuides() {
+            const grid = document.getElementById('guidesGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            let filtered = allGuides.filter(guide => {
+                const matchesCategory = currentCategory === 'all' || guide.category === currentCategory;
+                const matchesSearch = guide.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                     guide.description.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            grid.innerHTML = filtered.map(guide => createGuideCard(guide)).join('');
+        }
+
+        function createGuideCard(guide) {
+            return `
+                <div class="guide-card" onclick="openVideo('${guide.videoId}')">
+                    <div class="guide-thumbnail">
+                        <img src="${guide.thumbnail}" alt="${guide.title}">
+                        <div class="play-overlay">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <div class="duration-badge">
+                            <i class="far fa-clock"></i> ${guide.duration}
+                        </div>
+                    </div>
+                    <div class="guide-content">
+                        <span class="guide-category">${guide.category}</span>
+                        <h3 class="guide-title">${guide.title}</h3>
+                        <p class="guide-description">${guide.description}</p>
+                        <div class="guide-meta">
+                            <span class="difficulty-badge difficulty-${guide.difficulty}">
+                                <i class="fas fa-signal"></i> ${guide.difficulty}
+                            </span>
+                            <span class="guide-views">
+                                <i class="fas fa-eye"></i> ${guide.views}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setupFilters() {
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.dataset.category;
+                    displayGuides();
+                });
+            });
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value;
+                displayGuides();
+            });
+        }
+
+        function setupModal() {
+            const modal = document.getElementById('videoModal');
+            const closeBtn = document.getElementById('closeModal');
+            
+            closeBtn.addEventListener('click', closeVideo);
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeVideo();
+                }
+            });
+
+            // Close on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    closeVideo();
+                }
+            });
+        }
+
+        function openVideo(videoId) {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('videoFrame');
+            
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideo() {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('videoFrame');
+            
+            iframe.src = '';
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+</body>
+</html>

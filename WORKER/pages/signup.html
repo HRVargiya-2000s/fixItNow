@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Signup - FixItNow</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/worker.css">
+    <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-sun" id="themeIcon"></i>
+    </button>
+
+    <!-- (Navbar removed for auth page; theme toggle is positioned top-right via CSS) -->
+
+    <section class="auth-section">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-info">
+                    <div class="auth-info-content">
+                        <div class="auth-icon"><i class="fas fa-briefcase"></i></div>
+                        <h2>Join as a Worker</h2>
+                        <p>Create your account and start earning by helping people fix their problems.</p>
+                        <ul class="auth-features">
+                            <li><i class="fas fa-check-circle"></i> Get job requests</li>
+                            <li><i class="fas fa-check-circle"></i> Flexible schedule</li>
+                            <li><i class="fas fa-check-circle"></i> Earn money</li>
+                            <li><i class="fas fa-check-circle"></i> Build reputation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="auth-form-container">
+                    <div class="auth-header">
+                        <h1>Create Your Account</h1>
+                        <p class="auth-subtitle">Fill in your details to get started</p>
+                    </div>
+
+                    <form id="signupForm" class="auth-form">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Full Name</label>
+                            <input type="text" id="fullName" class="form-input" placeholder="Enter your full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> Email Address</label>
+                            <input type="email" id="email" class="form-input" placeholder="your.email@example.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-phone"></i> Phone Number</label>
+                            <input type="tel" id="phone" class="form-input" placeholder="+91 98765 43210" required>
+                        </div>
+
+                        <div class="form-group password-input-group">
+                            <label><i class="fas fa-lock"></i> Password</label>
+                            <input type="password" id="password" class="form-input" placeholder="Create a strong password" required>
+                            <button type="button" class="toggle-password" id="passwordToggle"><i class="fas fa-eye"></i></button>
+                        </div>
+
+                        <div class="form-group password-input-group">
+                            <label><i class="fas fa-lock"></i> Confirm Password</label>
+                            <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+                            <button type="button" class="toggle-password" id="confirmPasswordToggle"><i class="fas fa-eye"></i></button>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-tools"></i> Select Your Service Categories</label>
+                            <p class="category-hint">Choose one or more categories you can work on</p>
+                            <div class="category-grid">
+                                <!-- category items (unchanged) -->
+                                <label class="category-item">
+                                    <input type="checkbox" name="category" value="plumbing">
+                                    <div class="category-card">
+                                        <i class="fas fa-faucet"></i>
+                                        <span>Plumbing</span>
+                                    </div>
+                                </label>
+                                <label class="category-item">
+                                    <input type="checkbox" name="category" value="electrical">
+                                    <div class="category-card">
+                                        <i class="fas fa-bolt"></i>
+                                        <span>Electrical</span>
+                                    </div>
+                                </label>
+                                <label class="category-item">
+                                    <input type="checkbox" name="category" value="carpentry">
+                                    <div class="category-card">
+                                        <i class="fas fa-hammer"></i>
+                                        <span>Carpentry</span>
+                                    </div>
+                                </label>
+                                <label class="category-item">
+                                    <input type="checkbox" name="category" value="appliance">
+                                    <div class="category-card">
+                                        <i class="fas fa-blender"></i>
+                                        <span>Appliance</span>
+                                    </div>
+                                </label>
+                                <label class="category-item">
+                                    <input type="checkbox" name="category" value="hvac">
+                                    <div class="category-card">
+                                        <i class="fas fa-fan"></i>
+                                        <span>HVAC</span>
+                                    </div>
+                                </label>
+                                <label class="category-item">
+                                    <input type="checkbox" name="category" value="vehicle">
+                                    <div class="category-card">
+                                        <i class="fas fa-car"></i>
+                                        <span>Vehicle</span>
+                                    </div>
+                                </label>
+                                <label class="category-item">
+                                    <input type="checkbox" name="category" value="furniture">
+                                    <div class="category-card">
+                                        <i class="fas fa-couch"></i>
+                                        <span>Furniture</span>
+                                    </div>
+                                </label>
+                                <label class="category-item">
+                                    <input type="checkbox" name="category" value="painting">
+                                    <div class="category-card">
+                                        <i class="fas fa-paint-roller"></i>
+                                        <span>Painting</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="signupBtn">
+                            <span>Create Worker Account</span>
+                        </button>
+                    </form>
+
+                    <!-- Google sign-up removed to enforce Email/Password only -->
+
+                    <div class="auth-footer">
+                        <p>Already have an account? <a href="login.html" class="auth-link">Login</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Your Config & Auth -->
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+
+    <script>
+        // Theme management
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        // Password toggles - buttons contain an <i> icon
+        document.getElementById('passwordToggle').addEventListener('click', function() {
+            togglePasswordVisibility('password', '#passwordToggle i');
+        });
+        
+        document.getElementById('confirmPasswordToggle').addEventListener('click', function() {
+            togglePasswordVisibility('confirmPassword', '#confirmPasswordToggle i');
+        });
+
+        function togglePasswordVisibility(inputId, iconSelector) {
+            const input = document.getElementById(inputId);
+            const icon = document.querySelector(iconSelector);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Signup page loaded with Firebase');
+            
+            await window.workerAuth.init();
+
+            if (window.workerAuth.isAuthenticated()) {
+                console.log('✅ Already logged in, redirecting...');
+                showNotification('Already logged in! Redirecting...', 'success');
+                setTimeout(() => {
+                    const path = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html'
+                    window.location.href = path
+                }, 1000);
+                return;
+            }
+            
+            setupSignupForm();
+        });
+
+        // Setup signup form
+        function setupSignupForm() {
+            const signupForm = document.getElementById('signupForm');
+            
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const fullName = document.getElementById('fullName').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                const categoryCheckboxes = document.querySelectorAll('input[name="category"]:checked');
+                const categories = Array.from(categoryCheckboxes).map(cb => cb.value);
+                
+                // Validation
+                if (!fullName || !email || !phone || !password) {
+                    showNotification('Please fill in all fields', 'error');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showNotification('Password must be at least 6 characters', 'error');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showNotification('Passwords do not match', 'error');
+                    return;
+                }
+                
+                if (categories.length === 0) {
+                    showNotification('Please select at least one service category', 'error');
+                    return;
+                }
+                
+                const signupBtn = document.getElementById('signupBtn');
+                const originalHTML = signupBtn.innerHTML;
+                signupBtn.disabled = true;
+                signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Creating Account...</span>';
+                
+                try {
+                    const result = await window.workerAuth.signup(email, password, {
+                        fullName: fullName,
+                        phone: phone,
+                        categories: categories
+                    });
+                    
+                    if (result.success) {
+                        showNotification('Account created successfully! Redirecting...', 'success');
+                        // Mark that we've just signed up/logged in so auth-check can wait briefly and avoid redirect loops
+                        try { sessionStorage.setItem('justLoggedIn', '1'); console.log('[signup] set justLoggedIn') } catch (e) {}
+                        console.log('[signup] redirecting to index in 900ms')
+                        setTimeout(() => {
+                            const path = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html'
+                            window.location.href = path
+                        }, 900);
+                    } else {
+                        showNotification(result.error, 'error');
+                        signupBtn.disabled = false;
+                        signupBtn.innerHTML = originalHTML;
+                    }
+                } catch (error) {
+                    console.error('Signup error:', error);
+                    showNotification('Signup failed. Please try again.', 'error');
+                    signupBtn.disabled = false;
+                    signupBtn.innerHTML = originalHTML;
+                }
+            });
+        }
+
+        // Google sign-in intentionally removed to enforce Email/password authentication.
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const colors = { success: '#10b981', error: '#ef4444', info: '#3b82f6', warning: '#f59e0b' };
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+            
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 20px; right: 20px; background: ${colors[type]}; color: white;
+                padding: 1rem 1.5rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000; display: flex; align-items: center; gap: 0.75rem;
+                animation: slideInRight 0.3s ease; max-width: 350px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            `;
+            notification.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+            style.textContent = `
+            @keyframes slideInRight { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+            @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+            .category-hint { font-size: 12px; color: var(--text-secondary); margin-top: -5px; margin-bottom: 8px; }
+            /* make category cards more compact */
+            .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 8px; }
+            .category-item { cursor: pointer; }
+            .category-item input[type="checkbox"] { display: none; }
+            .category-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 8px; border: 1.5px solid var(--border-color); border-radius: 10px; transition: all 0.18s; background: var(--bg-primary); text-align: center; min-height: 58px; }
+            .category-card i { font-size: 18px; margin-bottom: 6px; color: var(--text-secondary); transition: all 0.18s; }
+            .category-card span { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+            .category-item input:checked + .category-card { border-color: #3b82f6; background: rgba(59, 130, 246, 0.06); }
+            .category-item input:checked + .category-card i { color: #3b82f6; transform: scale(1.05); }
+            .category-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

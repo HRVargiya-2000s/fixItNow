@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "fixItNow"
+  },
+  "targets": {
+    "fixItNow": {
+      "hosting": {
+        "user": [
+          "fixitnow-user"
+        ],
+        "worker": [
+          "fixitnow-worker"
+        ]
+      }
+    }
+  }
+}

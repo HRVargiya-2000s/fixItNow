@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Details - FixItNow Worker</title>
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/worker.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
+        body.auth-checked { opacity: 1; visibility: visible; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="../images/logo.svg" alt="FixItNow Logo" class="nav-logo">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <span>FixItNow Worker</span>
+                </a>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="job-requests.html" class="active">New Jobs</a></li>
+                <li><a href="ongoing-jobs.html">Ongoing Jobs</a></li>
+                <li><a href="completed-jobs.html">Completed Jobs</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                <!-- Online Status Toggle -->
+                <div class="status-toggle">
+                    <input type="checkbox" id="onlineStatus" class="status-checkbox">
+                    <label for="onlineStatus" class="status-label">
+                        <span class="status-text">Offline</span>
+                    </label>
+                </div>
+                
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <div style="position:relative;">
+                    <button class="btn-nav-login" id="profileToggle" aria-haspopup="true" aria-expanded="false" title="Account">
+                        <i class="fas fa-user"></i>
+                    </button>
+
+                    <div id="profileDropdown" class="user-menu-dropdown" style="display:none; position:absolute; right:0; top:48px; z-index:30;">
+                        <div class="user-menu-header">
+                            <img src="../images/logo.svg" alt="Profile">
+                            <div>
+                                <div style="font-weight:600;">Worker</div>
+                                <div style="font-size:12px; opacity:0.85;">Manage your account</div>
+                            </div>
+                        </div>
+                        <div class="user-menu-items">
+                            <a href="job-requests.html" id="menuJobRequests"><i class="fas fa-clipboard-list"></i> New Jobs</a>
+                            <a href="#" id="menuLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <a href="job-requests.html" style="color: var(--text-secondary); text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Back to Jobs
+                </a>
+            </div>
+            <h1 class="hero-title">Issue Details 🔍</h1>
+            <p class="hero-subtitle" id="issueStatusSubtitle">Loading issue details...</p>
+        </div>
+    </section>
+
+    <!-- Issue Details Section -->
+    <section class="issue-details-section">
+        <div class="container">
+            <div class="details-grid">
+                <!-- Main Details Card -->
+                <div class="details-card main-card">
+                    <div id="issueDetailsContent" style="padding: 2rem;">
+                        <div style="text-align: center; color: var(--text-secondary);">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                            <p>Loading issue details...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar: Action and Info -->
+                <div class="details-sidebar">
+                    <!-- Action Card -->
+                    <div class="details-card action-card">
+                        <h3>Actions</h3>
+                        <div class="action-buttons" id="actionButtons">
+                            <button class="btn-primary" id="acceptJobBtn">
+                                <i class="fas fa-check-circle"></i> Accept Job
+                            </button>
+                            <button class="btn-secondary" id="backBtn">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contact Info Card -->
+                    <div class="details-card info-card">
+                        <h3><i class="fas fa-phone"></i> Contact Information</h3>
+                        <div class="info-item">
+                            <strong>Phone:</strong>
+                            <p id="contactPhone">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Budget Card -->
+                    <div class="details-card budget-card">
+                        <h3><i class="fas fa-dollar-sign"></i> Budget</h3>
+                        <div class="budget-display" id="budgetDisplay">
+                            <p>-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-tools"></i> FixItNow Worker</h3>
+                    <p>Empowering freelance workers to grow their business</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="help.html">Help Center</a></li>
+                        <li><a href="guidelines.html">Guidelines</a></li>
+                        <li><a href="support.html">Support</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="safety.html">Safety Tips</a></li>
+                        <li><a href="pricing.html">Pricing Guide</a></li>
+                        <li><a href="reviews.html">Reviews</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 FixItNow Worker Portal. Design Engineering Project - IIA</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Config & Auth -->
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/auth-guard.js"></script>
+    <script src="../js/auth-check.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/issue-detail.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('auth-checked');
+        });
+    </script>
+
+    <script>
+        // Profile dropdown and logout handling
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const menuLogout = document.getElementById('menuLogout');
+
+            function closeDropdown() {
+                if (profileDropdown) profileDropdown.style.display = 'none';
+                if (profileToggle) profileToggle.setAttribute('aria-expanded', 'false');
+            }
+
+            function openDropdown() {
+                if (profileDropdown) profileDropdown.style.display = 'block';
+                if (profileToggle) profileToggle.setAttribute('aria-expanded', 'true');
+            }
+
+            if (profileToggle) {
+                profileToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    let isAuth = false;
+                    try { 
+                        isAuth = (window.workerAuthGuard && window.workerAuthGuard.isAuthenticated && window.workerAuthGuard.isAuthenticated()) || 
+                                 (window.workerAuth && window.workerAuth.isAuthenticated && window.workerAuth.isAuthenticated()) || 
+                                 (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser);
+                    } catch (err) { isAuth = false; }
+                    if (!isAuth) { const target = window.location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html'; window.location.replace(target); return; }
+                    if (profileDropdown && profileDropdown.style.display === 'block') closeDropdown(); else openDropdown();
+                });
+            }
+
+            if (menuLogout) {
+                menuLogout.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.workerAuthGuard && typeof window.workerAuthGuard.logout === 'function') {
+                        window.workerAuthGuard.logout();
+                    } else if (window.workerAuth && typeof window.workerAuth.logout === 'function') {
+                        window.workerAuth.logout();
+                    } else if (typeof auth !== 'undefined' && auth.signOut) {
+                        try { auth.signOut(); } catch (err) {}
+                    }
+                    const target = window.location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html';
+                    window.location.replace(target);
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                if (profileDropdown && !profileDropdown.contains(e.target) && e.target !== profileToggle) closeDropdown();
+            });
+        });
+    </script>
+</body>
+</html>

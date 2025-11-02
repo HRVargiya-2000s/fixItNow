@@ -1,0 +1,207 @@
+.review-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    border: 1px solid var(--border-color);
+}
+
+.review-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.review-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.review-section h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.review-section h3 i {
+    color: var(--primary-color);
+}
+
+.review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.review-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.review-item strong {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: rgba(79, 70, 229, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(79, 70, 229, 0.3);
+}
+
+.category-badge i {
+    color: var(--primary-color);
+}
+
+.urgency-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+}
+
+.urgency-badge.high {
+    background: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+.urgency-badge.medium {
+    background: rgba(217, 119, 6, 0.15);
+    color: #d97706;
+    border-color: #d97706;
+}
+
+.urgency-badge.low {
+    background: rgba(5, 150, 105, 0.15);
+    color: #059669;
+    border-color: #059669;
+}
+
+.urgency-badge.emergency {
+    background: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+.description-content {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.review-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.location-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.location-item,
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.location-item i,
+.contact-item i {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.attachments-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.attachments-status i.text-success {
+    color: #059669;
+}
+
+.attachments-status i.text-info {
+    color: #3b82f6;
+}
+
+/* Category-specific colors */
+.category-badge.electrical {
+    background: rgba(37, 99, 235, 0.15);
+    color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.category-badge.plumbing {
+    background: rgba(79, 70, 229, 0.15);
+    color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.category-badge.vehicle {
+    background: rgba(219, 39, 119, 0.15);
+    color: #db2777;
+    border-color: #db2777;
+}
+
+.category-badge.furniture {
+    background: rgba(234, 88, 12, 0.15);
+    color: #ea580c;
+    border-color: #ea580c;
+}
+
+.category-badge.appliance {
+    background: rgba(22, 163, 74, 0.15);
+    color: #16a34a;
+    border-color: #16a34a;
+}
+
+.category-badge.hvac {
+    background: rgba(71, 85, 105, 0.15);
+    color: #475569;
+    border-color: #475569;
+}
+
+.budget-amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.1);
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.date-value {
+    color: var(--text-secondary);
+}

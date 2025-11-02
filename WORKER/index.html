@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixItNow Worker Dashboard</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:;">
+    <script>
+        // Early suppression for noisy browser extension errors (e.g. Google Translate - content-all.js)
+        (function(){
+            function looksLikeExtensionError(obj){
+                try{
+                    if(!obj) return false;
+                    var msg = '';
+                    if(obj.message) msg += obj.message + ' ';
+                    if(obj.reason && obj.reason.message) msg += obj.reason.message + ' ';
+                    var filename = obj.filename || (obj.reason && obj.reason.filename) || '';
+
+                    if(msg.indexOf('translate-page') !== -1) return true;
+                    if(msg.indexOf('Cannot find menu item') !== -1) return true;
+                    if(filename.indexOf('content-all.js') !== -1) return true;
+                    if(filename.indexOf('chrome-extension://') === 0) return true;
+                    if(filename.indexOf('moz-extension://') === 0) return true;
+                    return false;
+                }catch(e){ return false; }
+            }
+
+            window.addEventListener('error', function(e){
+                if(looksLikeExtensionError(e)){
+                    try{ e.preventDefault(); }catch(err){}
+                    return false;
+                }
+            }, true);
+
+            window.addEventListener('unhandledrejection', function(e){
+                if(looksLikeExtensionError(e.reason || e)){
+                    try{ e.preventDefault(); }catch(err){}
+                    return false;
+                }
+            }, true);
+
+            // Quiet certain console.error noise coming from extensions
+            var _origConsoleError = console.error.bind(console);
+            console.error = function(){
+                try{
+                    var args = Array.prototype.slice.call(arguments).join(' ');
+                    if(args && (args.indexOf('translate-page') !== -1 || args.indexOf('content-all.js') !== -1 || args.indexOf('Cannot find menu item') !== -1)){
+                        return;
+                    }
+                }catch(e){}
+                _origConsoleError.apply(console, arguments);
+            };
+        })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/worker.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Prevent flash before auth check */
+        body {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        body.auth-checked {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* Modern account menu styles */
+        .user-menu-dropdown {
+            background: #1a2332;
+            color: var(--text-primary, #e6eef6);
+            border-radius: 12px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            min-width: 260px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .user-menu-header {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #0f172a 0%, #1a2332 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .user-menu-header img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-menu-header-text {
+            flex: 1;
+        }
+
+        .user-menu-header-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #fff;
+            margin: 0;
+        }
+
+        .user-menu-header-email {
+            font-size: 12px;
+            color: #94a3b8;
+            margin: 4px 0 0 0;
+        }
+
+        .user-menu-items {
+            padding: 8px 0;
+        }
+
+        .user-menu-items a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            color: inherit;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .user-menu-items a i {
+            width: 18px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .user-menu-items a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .user-menu-items a:hover i {
+            color: #3b82f6;
+        }
+
+        .user-menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+            margin: 8px 0;
+        }
+
+        .user-menu-items .logout-btn {
+            color: #ef4444;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 8px;
+            padding-top: 10px;
+        }
+
+        .user-menu-items .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .user-menu-items .logout-btn i {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <!-- Global Error Handler for Browser Extensions -->
+    <script>
+        // Suppress browser extension errors
+        window.addEventListener('error', function(e) {
+            // Suppress common extension errors
+            if (e.filename && (
+                e.filename.includes('content-all.js') ||
+                e.filename.includes('chrome-extension://') ||
+                e.filename.includes('moz-extension://') ||
+                e.message.includes('translate-page') ||
+                e.message.includes('Cannot find menu item')
+            )) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Suppress unhandled promise rejections from extensions
+        window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && (
+                e.reason.message && (
+                    e.reason.message.includes('translate-page') ||
+                    e.reason.message.includes('Cannot find menu item') ||
+                    e.reason.message.includes('content-all.js')
+                )
+            )) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Prevent extensions from modifying context menus
+        // Removed chrome.contextMenus.removeAll() as it may cause extension errors
+    </script>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="images/logo.svg" alt="FixItNow Logo" class="nav-logo">
+                <span>FixItNow Worker</span>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="pages/job-requests.html">New Jobs</a></li>
+                <li><a href="pages/ongoing-jobs.html">Ongoing Jobs</a></li>
+                <li><a href="pages/completed-jobs.html">Completed Jobs</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                <!-- Online Status Toggle -->
+                <div class="status-toggle">
+                    <input type="checkbox" id="onlineStatus" class="status-checkbox">
+                    <label for="onlineStatus" class="status-label">
+                        <span class="status-text">Offline</span>
+                    </label>
+                </div>
+                
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <div style="position:relative;">
+                    <button class="btn-nav-login" id="profileToggle" aria-haspopup="true" aria-expanded="false" title="Account">
+                        <i class="fas fa-user"></i>
+                    </button>
+
+                    <div id="profileDropdown" class="user-menu-dropdown" style="display:none; position:absolute; right:0; top:48px; z-index:30;">
+                        <div class="user-menu-header">
+                            <img id="profileDropdownImg" src="images/logo.svg" alt="Profile">
+                            <div class="user-menu-header-text">
+                                <p class="user-menu-header-name" id="profileDropdownName">Worker</p>
+                                <p class="user-menu-header-email" id="profileDropdownEmail">worker@email.com</p>
+                            </div>
+                        </div>
+                        <div class="user-menu-items">
+                            <a href="pages/job-requests.html" id="menuNewJobs"><i class="fas fa-list"></i> New Jobs</a>
+                            <a href="#" class="logout-btn" id="menuLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero worker-hero">
+        <div class="container">
+            <h1 class="hero-title">Welcome, Worker! 👷‍♂️</h1>
+            <p class="hero-subtitle">Manage your job requests, track ongoing work, and grow your business</p>
+            
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <i class="fas fa-inbox"></i>
+                    <div class="stat-info">
+                        <h3 id="newRequestsCount">0</h3>
+                        <p>New Requests</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-tools"></i>
+                    <div class="stat-info">
+                        <h3 id="ongoingJobsCount">0</h3>
+                        <p>Ongoing Jobs</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="stat-info">
+                        <h3 id="completedJobsCount">0</h3>
+                        <p>Completed This Month</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <div class="stat-info">
+                        <h3 id="ratingScore">4.8</h3>
+                        <p>Your Rating</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions Section -->
+    <section class="quick-access">
+        <div class="container">
+            <h2 class="section-title">Quick Actions</h2>
+            
+            <div class="quick-access-grid">
+                <a href="pages/job-requests.html" class="quick-card">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>New Jobs</h3>
+                    <p>See new job requests from customers</p>
+                    <span class="badge" id="newBadge">0 New</span>
+                </a>
+                
+                <a href="pages/ongoing-jobs.html" class="quick-card">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Ongoing Jobs</h3>
+                    <p>Track and update your active jobs</p>
+                    <span class="badge active-badge" id="activeBadge">0 Active</span>
+                </a>
+                
+                <a href="pages/earnings.html" class="quick-card">
+                    <i class="fas fa-wallet"></i>
+                    <h3>Earnings</h3>
+                    <p>View your payment history</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-tools"></i> FixItNow Worker</h3>
+                    <p>Empowering freelance workers to grow their business</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="pages/help.html">Help Center</a></li>
+                        <li><a href="pages/guidelines.html">Guidelines</a></li>
+                        <li><a href="pages/support.html">Support</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="pages/safety.html">Safety Tips</a></li>
+                        <li><a href="pages/pricing.html">Pricing Guide</a></li>
+                        <li><a href="pages/reviews.html">Reviews</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 FixItNow Worker Portal. Design Engineering Project - IIA</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs (needed for authentication checks) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Config & Auth wrapper for the worker portal -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script src="js/auth-check.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Profile dropdown and auth wiring
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const menuLogout = document.getElementById('menuLogout');
+
+            function closeDropdown() {
+                profileDropdown.style.display = 'none';
+                profileToggle.setAttribute('aria-expanded', 'false');
+            }
+
+            function openDropdown() {
+                profileDropdown.style.display = 'block';
+                profileToggle.setAttribute('aria-expanded', 'true');
+            }
+
+            function updateProfileInfo() {
+                try {
+                    let userData = null;
+                    let profileImg = null;
+                    let profileName = 'Worker';
+                    let profileEmail = 'worker@email.com';
+
+                    // Try to get user data from different auth sources
+                    if (window.workerAuthGuard && typeof window.workerAuthGuard.getWorkerData === 'function') {
+                        userData = window.workerAuthGuard.getWorkerData();
+                    } else if (window.unifiedAuth && typeof window.unifiedAuth.getUser === 'function') {
+                        userData = window.unifiedAuth.getUser();
+                    } else if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                        userData = firebase.auth().currentUser;
+                    }
+
+                    if (userData) {
+                        profileName = userData.fullName || userData.displayName || userData.name || 'Worker';
+                        profileEmail = userData.email || userData.userEmail || 'worker@email.com';
+                        profileImg = userData.picture || userData.photoURL || userData.profilePicture || 'images/logo.svg';
+                    }
+
+                    // Update dropdown header
+                    const profileDropdownImg = document.getElementById('profileDropdownImg');
+                    const profileDropdownName = document.getElementById('profileDropdownName');
+                    const profileDropdownEmail = document.getElementById('profileDropdownEmail');
+
+                    if (profileDropdownImg) profileDropdownImg.src = profileImg;
+                    if (profileDropdownName) profileDropdownName.textContent = profileName;
+                    if (profileDropdownEmail) profileDropdownEmail.textContent = profileEmail;
+
+                    // Update nav button icon/avatar
+                    if (profileImg && profileImg !== 'images/logo.svg') {
+                        profileToggle.innerHTML = `<img src="${profileImg}" alt="${profileName}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">`;
+                    } else {
+                        profileToggle.innerHTML = '<i class="fas fa-user-circle" style="font-size:1.2rem"></i>';
+                    }
+
+                    profileToggle.title = profileName;
+                } catch (err) {
+                    console.warn('Error updating profile info:', err);
+                }
+            }
+
+            // Toggle behavior
+            profileToggle.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                // Wait briefly for auth systems to be ready before deciding
+                let isAuth = false;
+                try {
+                    if (window.waitForAuthReady) {
+                        isAuth = await window.waitForAuthReady(1000);
+                    } else {
+                        // fallback immediate checks
+                        if (window.workerAuthGuard && typeof window.workerAuthGuard.isAuthenticated === 'function') isAuth = window.workerAuthGuard.isAuthenticated();
+                        if (!isAuth && window.workerAuth && typeof window.workerAuth.isAuthenticated === 'function') isAuth = window.workerAuth.isAuthenticated();
+                        if (!isAuth && typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) isAuth = true;
+                    }
+                } catch (err) { isAuth = false; }
+
+                if (!isAuth) {
+                    const target = window.location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html';
+                    window.location.replace(target);
+                    return;
+                }
+
+                // Update profile info before showing dropdown
+                updateProfileInfo();
+
+                // Toggle dropdown for authenticated users
+                if (profileDropdown.style.display === 'block') {
+                    closeDropdown();
+                } else {
+                    openDropdown();
+                }
+            });
+
+            // Logout menu item
+            menuLogout.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (window.workerAuthGuard && typeof window.workerAuthGuard.logout === 'function') {
+                    await window.workerAuthGuard.logout();
+                } else {
+                    // Fallback: try to use firebase auth if available
+                    if (window.workerAuth && typeof window.workerAuth.logout === 'function') {
+                        await window.workerAuth.logout();
+                    } else if (typeof auth !== 'undefined' && auth.signOut) {
+                        try { await auth.signOut(); } catch (err) { /* ignore */ }
+                        const target = window.location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html';
+                        window.location.replace(target);
+                    } else {
+                        const target = window.location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html';
+                        window.location.replace(target);
+                    }
+                }
+            });
+
+            // Close dropdown on outside click
+            document.addEventListener('click', (e) => {
+                if (!profileDropdown.contains(e.target) && e.target !== profileToggle) {
+                    closeDropdown();
+                }
+            });
+
+            // When auth guard initializes, show body (no flash) and update avatar if available
+            if (window.workerAuthGuard) {
+                // Wait briefly for guard.init if it's running
+                setTimeout(() => {
+                    try {
+                        if (window.workerAuthGuard.isAuthenticated()) {
+                            updateProfileInfo();
+                        }
+                    } catch (err) { /* ignore */ }
+                    document.body.classList.add('auth-checked');
+                }, 250);
+            } else {
+                // No auth guard; show page
+                document.body.classList.add('auth-checked');
+            }
+        });
+    </script>
+</body>
+</html>

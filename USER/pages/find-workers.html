@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Workers - FixItNow</title>
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/auth-guard.css">
+    <link rel="stylesheet" href="../css/workers.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Prevent flash of content before auth check */
+        body { opacity: 0; transition: opacity 0.3s ease; visibility: hidden; }
+        body.auth-checked { opacity: 1; visibility: visible; }
+    </style>
+    <script src="../js/auth-check.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="../images/logo.svg" alt="FixItNow Logo" class="nav-logo">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <span>FixItNow</span>
+                </a>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="report-issue.html">Report Issue</a></li>
+                <li><a href="find-workers.html" class="active">Find Workers</a></li>
+                <li><a href="my-issues.html">My Issues</a></li>
+                <li><a href="quick-guides.html">Quick Guides</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="login.html" class="btn-nav-login">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <section class="workers-header">
+        <div class="container">
+            <h1><i class="fas fa-users"></i> Find Skilled Freelancers</h1>
+            <p>Browse verified workers and hire the perfect professional for your repair needs</p>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="workers-filters">
+        <div class="container">
+            <div class="filter-card">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label><i class="fas fa-th-large"></i> Category</label>
+                        <select id="categoryFilter" class="filter-select">
+                            <option value="all">All Categories</option>
+                            <option value="electrical">Electrical</option>
+                            <option value="plumbing">Plumbing</option>
+                            <option value="vehicle">Vehicle</option>
+                            <option value="furniture">Furniture</option>
+                            <option value="appliance">Appliance</option>
+                            <option value="hvac">HVAC</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label><i class="fas fa-star"></i> Rating</label>
+                        <select id="ratingFilter" class="filter-select">
+                            <option value="all">All Ratings</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4+ Stars</option>
+                            <option value="3">3+ Stars</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label><i class="fas fa-dollar-sign"></i> Price Range</label>
+                        <select id="priceFilter" class="filter-select">
+                            <option value="all">All Prices</option>
+                            <option value="low">$ - Budget Friendly</option>
+                            <option value="medium">$$ - Moderate</option>
+                            <option value="high">$$$ - Premium</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label><i class="fas fa-map-marker-alt"></i> Location</label>
+                        <input type="text" id="locationFilter" class="filter-select" placeholder="Enter city or zip">
+                    </div>
+
+                    <div class="filter-group">
+                        <label><i class="fas fa-clock"></i> Availability</label>
+                        <select id="availabilityFilter" class="filter-select">
+                            <option value="all">Any Time</option>
+                            <option value="immediate">Available Now</option>
+                            <option value="today">Available Today</option>
+                            <option value="week">This Week</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn-secondary" id="resetFilters">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button class="btn-primary" id="applyFilters">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workers Grid -->
+    <section class="workers-section">
+        <div class="container">
+            <div class="workers-header-bar">
+                <div class="results-count">
+                    <span id="resultsCount">24</span> workers found
+                </div>
+                <div class="sort-options">
+                    <label>Sort by:</label>
+                    <select id="sortBy" class="sort-select">
+                        <option value="rating">Highest Rated</option>
+                        <option value="reviews">Most Reviews</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="experience">Most Experienced</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="workers-grid" id="workersGrid">
+                <!-- Worker Card 1 -->
+                <div class="worker-card" data-category="electrical" data-rating="5" data-price="medium">
+                    <div class="worker-badge verified">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </div>
+                    <div class="worker-badge available">
+                        <i class="fas fa-circle"></i> Available
+                    </div>
+                    
+                    <div class="worker-avatar">
+                        <img src="https://ui-avatars.com/api/?name=John+Smith&size=120&background=2563eb&color=fff" alt="John Smith">
+                    </div>
+
+                    <div class="worker-info">
+                        <h3>John Smith</h3>
+                        <p class="worker-specialty">
+                            <i class="fas fa-bolt"></i> Electrical Expert
+                        </p>
+
+                        <div class="worker-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span>5.0 (142 reviews)</span>
+                        </div>
+
+                        <div class="worker-stats">
+                            <div class="stat">
+                                <i class="fas fa-briefcase"></i>
+                                <span>5 years exp</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-tasks"></i>
+                                <span>250+ jobs</span>
+                            </div>
+                        </div>
+
+                        <div class="worker-price">
+                            <span class="price-label">Starting at</span>
+                            <span class="price-amount">$45/hr</span>
+                        </div>
+
+                        <div class="worker-skills">
+                            <span class="skill-tag">Wiring</span>
+                            <span class="skill-tag">Outlets</span>
+                            <span class="skill-tag">Lighting</span>
+                        </div>
+
+                        <div class="worker-actions">
+                            <button class="btn-secondary btn-view-profile">
+                                <i class="fas fa-user"></i> View Profile
+                            </button>
+                            <button class="btn-primary btn-hire">
+                                <i class="fas fa-handshake"></i> Hire Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Worker Card 2 -->
+                <div class="worker-card" data-category="plumbing" data-rating="5" data-price="medium">
+                    <div class="worker-badge verified">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </div>
+                    
+                    <div class="worker-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Maria+Garcia&size=120&background=10b981&color=fff" alt="Maria Garcia">
+                    </div>
+
+                    <div class="worker-info">
+                        <h3>Maria Garcia</h3>
+                        <p class="worker-specialty">
+                            <i class="fas fa-faucet"></i> Plumbing Specialist
+                        </p>
+
+                        <div class="worker-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span>5.0 (98 reviews)</span>
+                        </div>
+
+                        <div class="worker-stats">
+                            <div class="stat">
+                                <i class="fas fa-briefcase"></i>
+                                <span>8 years exp</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-tasks"></i>
+                                <span>320+ jobs</span>
+                            </div>
+                        </div>
+
+                        <div class="worker-price">
+                            <span class="price-label">Starting at</span>
+                            <span class="price-amount">$50/hr</span>
+                        </div>
+
+                        <div class="worker-skills">
+                            <span class="skill-tag">Faucets</span>
+                            <span class="skill-tag">Pipes</span>
+                            <span class="skill-tag">Drains</span>
+                        </div>
+
+                        <div class="worker-actions">
+                            <button class="btn-secondary btn-view-profile">
+                                <i class="fas fa-user"></i> View Profile
+                            </button>
+                            <button class="btn-primary btn-hire">
+                                <i class="fas fa-handshake"></i> Hire Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Worker Card 3 -->
+                <div class="worker-card" data-category="vehicle" data-rating="4" data-price="high">
+                    <div class="worker-badge verified">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </div>
+                    <div class="worker-badge top-rated">
+                        <i class="fas fa-crown"></i> Top Rated
+                    </div>
+                    
+                    <div class="worker-avatar">
+                        <img src="https://ui-avatars.com/api/?name=David+Lee&size=120&background=ef4444&color=fff" alt="David Lee">
+                    </div>
+
+                    <div class="worker-info">
+                        <h3>David Lee</h3>
+                        <p class="worker-specialty">
+                            <i class="fas fa-car"></i> Auto Mechanic
+                        </p>
+
+                        <div class="worker-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span>4.8 (215 reviews)</span>
+                        </div>
+
+                        <div class="worker-stats">
+                            <div class="stat">
+                                <i class="fas fa-briefcase"></i>
+                                <span>12 years exp</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-tasks"></i>
+                                <span>500+ jobs</span>
+                            </div>
+                        </div>
+
+                        <div class="worker-price">
+                            <span class="price-label">Starting at</span>
+                            <span class="price-amount">$65/hr</span>
+                        </div>
+
+                        <div class="worker-skills">
+                            <span class="skill-tag">Oil Change</span>
+                            <span class="skill-tag">Brakes</span>
+                            <span class="skill-tag">Engine</span>
+                        </div>
+
+                        <div class="worker-actions">
+                            <button class="btn-secondary btn-view-profile">
+                                <i class="fas fa-user"></i> View Profile
+                            </button>
+                            <button class="btn-primary btn-hire">
+                                <i class="fas fa-handshake"></i> Hire Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- More worker cards would be generated dynamically -->
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="page-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">4</button>
+                <button class="page-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-tools"></i> FixItNow</h3>
+                    <p>Empowering self-reliance through visual repair guides</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="troubleshooter.html">Troubleshooter</a></li>
+                        <li><a href="toolbox.html">Toolbox</a></li>
+                        <li><a href="safety.html">Safety Guidelines</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 FixItNow. Design Engineering Project - IIA</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/api-config.js"></script>
+    <script src="../js/auth-guard.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/find-workers.js"></script>
+</body>
+</html>

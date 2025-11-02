@@ -1,0 +1,251 @@
+/* ========================================
+   AUTHENTICATION GUARD STYLES
+   User menu dropdown and auth messages
+   ======================================== */
+
+/* User Avatar in Nav */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.user-avatar:hover {
+    transform: scale(1.1);
+}
+
+/* User Menu Dropdown */
+.user-menu-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    min-width: 280px;
+    z-index: 10000;
+    overflow: hidden;
+    animation: slideDown 0.3s ease;
+}
+
+[data-theme="dark"] .user-menu-dropdown {
+    background: #1f2937;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid #374151;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.user-menu-header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.user-menu-header i {
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.user-menu-header div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-menu-header strong {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.user-menu-header small {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.user-menu-items {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0;
+}
+
+.user-menu-items a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.user-menu-items a:hover {
+    background: #f3f4f6;
+    color: var(--primary-color);
+    padding-left: 1.5rem;
+}
+
+[data-theme="dark"] .user-menu-items a:hover {
+    background: #374151;
+    color: var(--secondary-color);
+}
+
+.user-menu-items a i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.user-menu-items a#logoutBtn {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 0.5rem;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.user-menu-items a#logoutBtn:hover {
+    background: #fef2f2;
+    color: #b91c1c;
+    font-weight: 700;
+}
+
+[data-theme="dark"] .user-menu-items a#logoutBtn {
+    border-top: 1px solid #374151;
+    color: #ef4444;
+}
+
+[data-theme="dark"] .user-menu-items a#logoutBtn:hover {
+    background: #450a0a;
+    color: #fca5a5;
+}
+
+/* Auth Messages (for logout/error notifications) */
+.auth-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 10001;
+    opacity: 0;
+    transform: translateX(100px);
+    transition: all 0.4s ease;
+}
+
+[data-theme="dark"] .auth-message {
+    background: #1f2937;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid #374151;
+}
+
+.auth-message.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.auth-message-success {
+    border-left: 4px solid #10b981;
+}
+
+.auth-message-success i {
+    color: #10b981;
+    font-size: 1.5rem;
+}
+
+.auth-message-error {
+    border-left: 4px solid #ef4444;
+}
+
+.auth-message-error i {
+    color: #ef4444;
+    font-size: 1.5rem;
+}
+
+.auth-message span {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .user-menu-dropdown {
+        min-width: 260px;
+        right: -10px;
+    }
+    
+    .auth-message {
+        right: 10px;
+        left: 10px;
+        max-width: calc(100% - 20px);
+    }
+}
+
+/* Loading/Protected Page Overlay (optional) */
+.page-protection-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    transition: opacity 0.3s ease;
+}
+
+[data-theme="dark"] .page-protection-overlay {
+    background: #111827;
+}
+
+.page-protection-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.protection-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f4f6;
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
